@@ -49,9 +49,9 @@ class Busca(ListaProdutos):
         self.request.session['termo'] = termo
 
         qs = qs.filter(
-            Q(nome__icontains=termo) |
-            Q(descricao_curta__icontains=termo) |
-            Q(descricao_longa__icontains=termo)
+            Q(nome__icontains=termo) #|
+            #Q(descricao_curta__icontains=termo) |
+            #Q(descricao_longa__icontains=termo)
         )
 
         self.request.session.save()

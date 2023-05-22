@@ -4,6 +4,7 @@ from . import models
 
 
 class PerfilForm(forms.ModelForm):
+    data_nascimento = forms.DateField(label='Data de nascimento', widget=forms.DateInput(format= '%d/%m/%Y', attrs={'type':'date'}) )
     class Meta:
         model = models.Perfil
         fields = '__all__'
