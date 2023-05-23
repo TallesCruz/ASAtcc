@@ -8,5 +8,5 @@
 {% block conteudo %}
 
 {% include 'parciais/_pedido.html' %}
-
+{% if pedido.status == 'C' %} <a class="btn btn-primary btn-block btn-lg" href="{% url 'pedido:pagar' pedido.id %}">Realizar Pagamento</a>{% endif %}
 {% endblock %}

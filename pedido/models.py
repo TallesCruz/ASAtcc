@@ -4,7 +4,8 @@ from django.contrib.auth.models import User
 
 class Pedido(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
-    total = models.FloatField()
+    total = models.FloatField()    
+    data_pedido = models.DateField(auto_now_add=True)
     qtd_total = models.PositiveIntegerField()
     status = models.CharField(
         default="C",

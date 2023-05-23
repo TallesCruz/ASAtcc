@@ -3,6 +3,7 @@
     <tr>
       <th>Pedido</th>
       <th>Usuário</th>
+      <th>Data</th>
       <th>Total</th>
       <th>Quantidade Total</th>
       <th>Status</th>
@@ -13,6 +14,7 @@
     <tr>
       <td>{{ pedido.pk }}</td>
       <td>{{ pedido.usuario.username }}</td>
+      <td>{{ pedido.data_pedido }}</td>
       <td>{{ pedido.total }}</td>
       <td>{{ pedido.qtd_total }}</td>
       <td>{{ pedido.get_status_display }}</td>

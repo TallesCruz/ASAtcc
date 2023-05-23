@@ -16,8 +16,11 @@
 {% include 'parciais/_pedido.html' %}
 
 <div class="row mt-4">
-    <div class="col">
-        <a href="/pedido/lista/" class="btn btn-primary btn-block btn-lg">Pagar</a>
+    <div class="col"><form method="post" action="{% url 'pedido:pagar' pedido.id %}">
+        {% csrf_token %}
+        <button  class="btn btn-primary btn-block btn-lg" type="submit">Pagar</button>
+    </form>
+
     </div>
 </div>
 

@@ -9,6 +9,7 @@ from produto.models import Variacao
 from .models import Pedido, ItemPedido
 from django.db import transaction
 from utils import utils
+from datetime import date
 
 class DispatchLoginRequiredMixin(View):
     def dispatch(self, *args, **kwargs):
@@ -24,13 +25,45 @@ class DispatchLoginRequiredMixin(View):
 
 
 class Pagar(DispatchLoginRequiredMixin, DetailView):
-    template_name = 'pedido/pagar.html'
     model = Pedido
     pk_url_kwarg = 'pk'
     context_object_name = 'pedido'
+    template_name = 'pedido/pagar.html'
+
+    @transaction.atomic
+    def get(self, *args, **kwargs):
+        if not self.request.user.is_authenticated:
+            messages.error(
+                self.request,
+                'Você precisa fazer login.'
+            )
+            return redirect('perfil:criar')
+
+        if not self.request.session.get('carrinho'):
+            messages.error(
+                self.request,
+                'Seu carrinho está vazio.'
+            )
+            return redirect('produto:lista')
+
+        return super().get(*args, **kwargs)
+
+    @transaction.atomic
+    def post(self, request, *args, **kwargs):
+        pedido_id = self.kwargs['pk']
+        pedido = Pedido.objects.get(id=pedido_id)
+        pedido.status = 'A'  # Altera o status para 'Pago'
+        pedido.data_pedido = date.today()
+        pedido.save()
+
+        messages.success(
+            self.request,
+            'O pagamento foi realizado com sucesso.'
+        )
+        return redirect(reverse('pedido:detalhe', kwargs={'pk': pedido.pk}))
 
 class SalvarPedido(View):
-    template_name = 'pedido/pagar.html'
+    template_name = 'produto/resumodacompra.html'
 
     @transaction.atomic
     def get(self, *args, **kwargs):
@@ -95,7 +128,8 @@ class SalvarPedido(View):
                 )
 
             # Cria o item do pedido para a variação atual
-            
+     
+        pedido.save()       
         # Cria os itens do pedido
         items_pedido = [
                     ItemPedido(
@@ -117,7 +151,6 @@ class SalvarPedido(View):
         # Atualiza o estoque
         variacao.estoque -= qtd_carrinho
         variacao.save()
-        pedido.save()
 
         return redirect(
            reverse(

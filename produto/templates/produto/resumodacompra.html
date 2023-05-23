@@ -17,8 +17,6 @@
             <dt class="col-lg-2">Sobrenome:</dt>
             <dd class="col-lg-4">{{ usuario.last_name }}</dd>
 
-            <dt class="col-lg-2">Idade:</dt>
-            <dd class="col-lg-4">{{ usuario.perfil.idade }}</dd>
             <dt class="col-lg-2">Nascimento:</dt>
             <dd class="col-lg-4">{{ usuario.perfil.data_nascimento }}</dd>
 
@@ -73,7 +71,7 @@
 <div class="row">
     <div class="col">
         <a class="btn btn-block btn-primary btn-lg" href="{% url 'pedido:salvarpedido' %}">
-            Realizar pedido e pagar
+            Salvar pedido e pagar
         </a>
     </div>
 </div>

@@ -8,9 +8,16 @@
         <div class="row mt-4">
             <div class="col-lg-2 font-weight-bold">Número do pedido:</div>
             <div class="col-lg-4">{{ pedido.id }}</div>
-            <div class="col-lg-2 font-weight-bold">Total a pagar:</div>
+            {% if pedido.status == 'C' %}
+            <div class="col-lg-2 font-weight-bold">Total a pagar:</div>    
             <div class="col-lg-4">{{ pedido.total|formata_preco }}</div>
+            {% else %}  
+            <div class="col-lg-2 font-weight-bold">Total pago:</div>            
+            <div class="col-lg-4">{{ pedido.total|formata_preco }}</div>
+            <div class="col-lg-2 font-weight-bold">Data da Compra:</div>            
+            <div class="col-lg-4">{{ pedido.data_pedido }}</div>
 
+            {% endif %}
             <div class="col-lg-2 font-weight-bold">QTD. Itens:</div>
             <div class="col-lg-4">{{ pedido.qtd_total }}</div>
             <div class="col-lg-2 font-weight-bold">Status:</div>
