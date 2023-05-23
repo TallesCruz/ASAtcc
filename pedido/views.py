@@ -98,12 +98,13 @@ class SalvarPedido(View):
             qtd_total=qtd_total_carrinho,
             status='C',
         )
-
+        pedido.save()
 
         items_pedido = []
 
         for variacao in bd_variacoes:
             vid = variacao.id
+            qtd_carrinho = carrinho[str(vid)]['quantidade']
 
             estoque = variacao.estoque
             qtd_carrinho = carrinho[str(vid)]['quantidade']
@@ -127,30 +128,25 @@ class SalvarPedido(View):
                     error_msg_estoque
                 )
 
-            # Cria o item do pedido para a variação atual
-     
-        pedido.save()       
-        # Cria os itens do pedido
-        items_pedido = [
-                    ItemPedido(
-                                pedido=pedido,
-                                produto=v['produto_nome'],
-                                produto_id=v['produto_id'],
-                                variacao=v['variacao_nome'],
-                                variacao_id=v['variacao_id'],
-                                preco=v['preco_quantitativo'],
-                                preco_promocional=v['preco_quantitativo_promocional'],
-                                quantidade=v['quantidade'],
-                                imagem=v['imagem'],
-                    ) for v in carrinho.values()
-                    if str(v['variacao_id']) == str(vid)
-        ]
+            item_pedido = ItemPedido(
+                pedido=pedido,
+                produto=variacao.produto.nome,
+                produto_id=variacao.produto.id,
+                variacao=variacao.nome,
+                variacao_id=variacao.id,
+                preco=preco_unt * qtd_carrinho,
+                preco_promocional=preco_unt_promo * qtd_carrinho,
+                quantidade=qtd_carrinho,
+                imagem=variacao.produto.imagem,
+            )
+            items_pedido.append(item_pedido)
+
+            # Atualiza o estoque
+            variacao.estoque -= qtd_carrinho
+            variacao.save()
 
         ItemPedido.objects.bulk_create(items_pedido)
 
-        # Atualiza o estoque
-        variacao.estoque -= qtd_carrinho
-        variacao.save()
 
         return redirect(
            reverse(
