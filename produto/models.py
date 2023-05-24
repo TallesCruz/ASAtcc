@@ -23,6 +23,8 @@ class Produto(models.Model):
             ('O', 'Outro'),
             ('M', 'Masculino'),
             ('F', 'Femenino'),
+            ('I', 'Infantil'),
+            ('A', 'Acessórios'),
         )
     )
 

@@ -38,6 +38,21 @@ class ListaProdutosF(ListView):
     ordering = ['-id']
 
 
+class ListaProdutosI(ListView):
+    model = models.Produto
+    template_name = 'produto/listaI.html'
+    context_object_name = 'produtos'
+    paginate_by = 10
+    ordering = ['-id']
+
+
+class ListaProdutosA(ListView):
+    model = models.Produto
+    template_name = 'produto/listaA.html'
+    context_object_name = 'produtos'
+    paginate_by = 10
+    ordering = ['-id']
+
 class Busca(ListaProdutos):
     def get_queryset(self, *args, **kwargs):
         termo = self.request.GET.get('termo') or self.request.session['termo']
