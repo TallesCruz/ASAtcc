@@ -56,6 +56,21 @@ class Pagar(DispatchLoginRequiredMixin, DetailView):
         pedido.data_pedido = date.today()
         pedido.save()
 
+        carrinho = self.request.session.get('carrinho')
+        carrinho_variacao_ids = [v for v in carrinho]
+        bd_variacoes = list(
+            Variacao.objects.select_related('produto')
+            .filter(id__in=carrinho_variacao_ids)
+        )
+
+        # Atualiza o estoque
+        for variacao in bd_variacoes:
+            vid = variacao.id
+            qtd_carrinho = carrinho[str(vid)]['quantidade']
+            variacao.estoque -= qtd_carrinho
+            variacao.save()
+        
+
         messages.success(
             self.request,
             'O pagamento foi realizado com sucesso.'
@@ -142,8 +157,9 @@ class SalvarPedido(View):
             items_pedido.append(item_pedido)
 
             # Atualiza o estoque
+            """
             variacao.estoque -= qtd_carrinho
-            variacao.save()
+            variacao.save()"""
 
         ItemPedido.objects.bulk_create(items_pedido)
 
