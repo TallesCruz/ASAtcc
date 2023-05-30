@@ -22,7 +22,7 @@ class Produto(models.Model):
         choices=(
             ('O', 'Outro'),
             ('M', 'Masculino'),
-            ('F', 'Femenino'),
+            ('F', 'Feminino'),
             ('I', 'Infantil'),
             ('A', 'Acessórios'),
         )
