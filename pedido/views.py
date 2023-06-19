@@ -195,33 +195,15 @@ class Lista(DispatchLoginRequiredMixin, ListView):
     paginate_by = 10
     ordering = ['-id']
 
-
-def vendas(request):	
+def vendas(request):
     pedidos = Pedido.objects.all()
-    total_faturado = pedidos.aggregate(Sum('total'))['total__sum']
-    total_itens_vendidos = pedidos.aggregate(Count('itempedido'))['itempedido__count']
+    pedidos_aprovados = Pedido.objects.filter(status='A')
+    total_faturado = pedidos_aprovados.aggregate(Sum('total'))['total__sum']     
+    total_itens_vendidos = pedidos_aprovados.aggregate(total=Sum('itempedido__quantidade'))['total']
+    
     context = {
         'pedidos': pedidos,
         'total_faturado': total_faturado,
         'total_itens_vendidos': total_itens_vendidos,
     }
-    return render(request, 'pedido/vendas.html', context)
-from produto.models import Variacao
-from django.db.models import Subquery, OuterRef, Count, CharField, Exists
-
-def solicitacao(request):
-    subquery_produtos = ItemPedido.objects.filter(pedido=OuterRef('pk')).values('fk_variacao__produto__tipo')
-    pedidos = Pedido.objects.annotate(
-        quantidade_total=Sum('itempedido__quantidade'),
-        faturamento_total=Sum('itempedido__preco'),
-        produto_mais_vendido=Subquery(subquery_produtos.annotate(tipo_count=Count('fk_variacao__produto__tipo')).values('fk_variacao__produto__tipo').order_by('-tipo_count')[:1], output_field=CharField()),
-        tipo_mais_vendido=Subquery(subquery_produtos.annotate(tipo_count=Count('fk_variacao__produto__tipo')).values('fk_variacao__produto__tipo').order_by('-tipo_count')[:1], output_field=CharField())
-    ).order_by('-quantidade_total')
-
-    context = {
-        'pedidos': pedidos,
-        'total_faturado': pedidos.aggregate(Sum('total'))['total__sum'],
-        'total_itens_vendidos': pedidos.aggregate(Count('itempedido'))['itempedido__count'],
-    }
-
     return render(request, 'pedido/vendas.html', context)
