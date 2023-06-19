@@ -3,13 +3,15 @@ from django.views.generic import ListView, DetailView
 from django.views import View
 # from django.http import HttpResponse
 from django.contrib import messages
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, F, OuterRef, Subquery, CharField, Value, Q
 
 from produto.models import Variacao
 from .models import Pedido, ItemPedido
 from django.db import transaction
 from utils import utils
 from datetime import date
+from .forms import PaymentForm
+from django.views.generic.edit import FormMixin
 
 class DispatchLoginRequiredMixin(View):
     def dispatch(self, *args, **kwargs):
@@ -24,12 +26,19 @@ class DispatchLoginRequiredMixin(View):
         return qs
 
 
-class Pagar(DispatchLoginRequiredMixin, DetailView):
+class Pagar(DispatchLoginRequiredMixin, FormMixin, DetailView):
     model = Pedido
     pk_url_kwarg = 'pk'
     context_object_name = 'pedido'
     template_name = 'pedido/pagar.html'
+    form_class = PaymentForm
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        form = self.get_form()
+        context['form'] = form
+        return context
+        
     @transaction.atomic
     def get(self, *args, **kwargs):
         if not self.request.user.is_authenticated:
@@ -197,8 +206,22 @@ def vendas(request):
         'total_itens_vendidos': total_itens_vendidos,
     }
     return render(request, 'pedido/vendas.html', context)
-    
-def solicitacao(request):	 
-    pedidos = Pedido.objects.all()
-    return render(request, 'pedido/solicitacao.html', {'pedidos': pedidos})
-    
+from produto.models import Variacao
+from django.db.models import Subquery, OuterRef, Count, CharField, Exists
+
+def solicitacao(request):
+    subquery_produtos = ItemPedido.objects.filter(pedido=OuterRef('pk')).values('fk_variacao__produto__tipo')
+    pedidos = Pedido.objects.annotate(
+        quantidade_total=Sum('itempedido__quantidade'),
+        faturamento_total=Sum('itempedido__preco'),
+        produto_mais_vendido=Subquery(subquery_produtos.annotate(tipo_count=Count('fk_variacao__produto__tipo')).values('fk_variacao__produto__tipo').order_by('-tipo_count')[:1], output_field=CharField()),
+        tipo_mais_vendido=Subquery(subquery_produtos.annotate(tipo_count=Count('fk_variacao__produto__tipo')).values('fk_variacao__produto__tipo').order_by('-tipo_count')[:1], output_field=CharField())
+    ).order_by('-quantidade_total')
+
+    context = {
+        'pedidos': pedidos,
+        'total_faturado': pedidos.aggregate(Sum('total'))['total__sum'],
+        'total_itens_vendidos': pedidos.aggregate(Count('itempedido'))['itempedido__count'],
+    }
+
+    return render(request, 'pedido/vendas.html', context)

@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
 
 {% block titulo %}Pagamento | {% endblock %}
 
@@ -10,14 +11,34 @@
     <div class="col">
         <h3>Escolha o método de pagamento</h3>
         <p>Adicione seu método de pagamento preferido.</p>
+        <form method="post" action="{% url 'pedido:pagar' pedido.id %}">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-12">
+                    {{ form.card_type|as_crispy_field }}
+                </div><div class="col-md-12">
+                    {{ form.cardholder_name|as_crispy_field }}
+                </div>
+                <div class="col-md-6">
+                    {{ form.card_number|as_crispy_field }}
+                </div> 
+                    <div class="col-md-2">
+                    {{ form.expiration_month|as_crispy_field }}
+                </div>
+                <div class="col-md-2">
+                    {{ form.expiration_year|as_crispy_field }}
+                </div>
+                <div class="col-md-6">
+                    {{ form.cvv|as_crispy_field }}
+                </div>
+            </div>
     </div>
 </div>
 
-{% include 'parciais/_pedido.html' %}
+    {% include 'parciais/_pedido.html' %}
 
 <div class="row mt-4">
-    <div class="col"><form method="post" action="{% url 'pedido:pagar' pedido.id %}">
-        {% csrf_token %}
+    <div class="col">
         <button  class="btn btn-primary btn-block btn-lg" type="submit">Pagar</button>
     </form>
 
