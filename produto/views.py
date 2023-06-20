@@ -236,3 +236,19 @@ class ResumoDaCompra(View):
         }
 
         return render(self.request, 'produto/resumodacompra.html', contexto)
+
+
+from pedido.models import ItemPedido, Pedido
+from django.db.models import Sum
+def solicitacao(request):
+    pedidos = Pedido.objects.all()
+    faturamento_total = pedidos.aggregate(faturamento=Sum('total'))['faturamento'] or 0
+    produto_mais_vendido = ItemPedido.objects.values('produto').annotate(total_vendas=Sum('quantidade')).order_by('-total_vendas').first()
+    produto_menos_vendido = ItemPedido.objects.values('produto').annotate(total_vendas=Sum('quantidade')).order_by('-total_vendas').last()
+
+    return render(request, "produto/solicitacao.html", {
+        "pedidos": pedidos,
+        "faturamento_total": faturamento_total,
+        "produto_mais_vendido": produto_mais_vendido,
+        "produto_menos_vendido": produto_menos_vendido
+    })

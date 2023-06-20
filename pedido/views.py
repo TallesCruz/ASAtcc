@@ -195,12 +195,29 @@ class Lista(DispatchLoginRequiredMixin, ListView):
     paginate_by = 10
     ordering = ['-id']
 
+from datetime import datetime
 def vendas(request):
-    pedidos = Pedido.objects.all()
-    pedidos_aprovados = Pedido.objects.filter(status='A')
-    total_faturado = pedidos_aprovados.aggregate(Sum('total'))['total__sum']     
-    total_itens_vendidos = pedidos_aprovados.aggregate(total=Sum('itempedido__quantidade'))['total']
-    
+    if request.method == 'GET':
+        data_inicial = request.GET.get('data_inicial')
+        data_final = request.GET.get('data_final')
+
+        if data_inicial and data_final:
+            # Converter as datas para objetos datetime
+            data_inicial = datetime.strptime(data_inicial, '%Y-%m-%d').date()
+            data_final = datetime.strptime(data_final, '%Y-%m-%d').date()
+
+            pedidos = Pedido.objects.filter(data_pedido__range=(data_inicial, data_final), status='A')
+            total_faturado = pedidos.aggregate(Sum('total'))['total__sum']
+            total_itens_vendidos = pedidos.aggregate(Sum('qtd_total'))['qtd_total__sum']
+        else:
+            pedidos = Pedido.objects.all()
+            total_faturado = 0
+            total_itens_vendidos = 0
+    else:
+        pedidos = Pedido.objects.all()
+        total_faturado = 0
+        total_itens_vendidos = 0
+
     context = {
         'pedidos': pedidos,
         'total_faturado': total_faturado,
