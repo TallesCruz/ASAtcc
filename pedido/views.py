@@ -48,13 +48,6 @@ class Pagar(DispatchLoginRequiredMixin, FormMixin, DetailView):
             )
             return redirect('perfil:criar')
 
-        if not self.request.session.get('carrinho'):
-            messages.error(
-                self.request,
-                'Seu carrinho está vazio.'
-            )
-            return redirect('produto:lista')
-
         return super().get(*args, **kwargs)
 
     @transaction.atomic
@@ -82,7 +75,7 @@ class Pagar(DispatchLoginRequiredMixin, FormMixin, DetailView):
 
         messages.success(
             self.request,
-            'O pagamento foi realizado com sucesso.'
+            'O pagamento foi realizado com sucesso. Em breve seu pedido chegará!'
         )
         return redirect(reverse('pedido:detalhe', kwargs={'pk': pedido.pk}))
 
@@ -164,6 +157,9 @@ class SalvarPedido(View):
                 imagem=variacao.produto.imagem,
             )
             items_pedido.append(item_pedido)
+            
+            # Limpa o carrinho
+            self.request.session['carrinho'] = {}
 
             # Atualiza o estoque
             """
@@ -194,6 +190,7 @@ class Lista(DispatchLoginRequiredMixin, ListView):
     template_name = 'pedido/lista.html'
     paginate_by = 10
     ordering = ['-id']
+    
 
 from datetime import datetime
 def vendas(request):
@@ -215,9 +212,14 @@ def vendas(request):
             total_itens_vendidos = 0
     else:
         pedidos = Pedido.objects.all()
-        total_faturado = 0
-        total_itens_vendidos = 0
+        total_faturado = pedidos.aggregate(Sum('total'))['total__sum']
+        total_itens_vendidos = pedidos.aggregate(Sum('qtd_total'))['qtd_total__sum']
 
+    pedidos = pedidos.annotate(
+        itens_pedido=Count('itempedido'),
+        quantidade_itens=Sum('itempedido__quantidade')
+    )
+    
     context = {
         'pedidos': pedidos,
         'total_faturado': total_faturado,

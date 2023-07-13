@@ -6,6 +6,58 @@ from django.utils.text import slugify
 from utils import utils
 
 
+class Fornecedor(models.Model):
+    nome = models.CharField(u'Nome do Fornecedor',max_length=155)
+    representante = models.CharField('Nome do representante',max_length=255)
+    tel = models.CharField('Telefone do Fornecedor', max_length=11)    
+    cnpj = models.CharField('CNPJ', max_length=14, null=True)
+    endereco = models.CharField(u'Endereço', max_length=50, null=True)
+    numero = models.CharField(u'Número',max_length=5)
+    complemento = models.CharField(max_length=30, blank=True, null=True)
+    bairro = models.CharField(max_length=30)
+    cep = models.CharField(u'CEP (Somente números)',max_length=8)
+    cidade = models.CharField(max_length=30)
+    estado = models.CharField(
+        max_length=2,
+        default='SP',
+        choices=(
+            ('AC', 'Acre'),
+            ('AL', 'Alagoas'),
+            ('AP', 'Amapá'),
+            ('AM', 'Amazonas'),
+            ('BA', 'Bahia'),
+            ('CE', 'Ceará'),
+            ('DF', 'Distrito Federal'),
+            ('ES', 'Espírito Santo'),
+            ('GO', 'Goiás'),
+            ('MA', 'Maranhão'),
+            ('MT', 'Mato Grosso'),
+            ('MS', 'Mato Grosso do Sul'),
+            ('MG', 'Minas Gerais'),
+            ('PA', 'Pará'),
+            ('PB', 'Paraíba'),
+            ('PR', 'Paraná'),
+            ('PE', 'Pernambuco'),
+            ('PI', 'Piauí'),
+            ('RJ', 'Rio de Janeiro'),
+            ('RN', 'Rio Grande do Norte'),
+            ('RS', 'Rio Grande do Sul'),
+            ('RO', 'Rondônia'),
+            ('RR', 'Roraima'),
+            ('SC', 'Santa Catarina'),
+            ('SP', 'São Paulo'),
+            ('SE', 'Sergipe'),
+            ('TO', 'Tocantins'),
+        )
+    )
+    
+    def __str__(self):
+        return self.nome
+
+    class Meta:
+        verbose_name = 'Fornecedor'
+        verbose_name_plural = 'Fornecedores'
+
 class Produto(models.Model):
     nome = models.CharField(max_length=255)
     descricao_curta = models.TextField(max_length=255)
@@ -27,6 +79,7 @@ class Produto(models.Model):
             ('A', 'Acessórios'),
         )
     )
+    fornecedor = models.ForeignKey(Fornecedor, on_delete=models.CASCADE, null=True, blank=True)
 
     def get_preco_formatado(self):
         return utils.formata_preco(self.preco_marketing)

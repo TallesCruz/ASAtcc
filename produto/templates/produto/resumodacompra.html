@@ -35,7 +35,7 @@
             <dd class="col-lg-4">{{ usuario.perfil.numero }}</dd>
 
             <dt class="col-lg-2">Complemento:</dt>
-            <dd class="col-lg-4">{{ usuario.perfil.complemento }}</dd>
+            <dd class="col-lg-4">{% if usuario.perfil.complemento == null %}-{%else%}{{ usuario.perfil.complemento }}{%endif%}</dd>
             <dt class="col-lg-2">Nascimento:</dt>
             <dd class="col-lg-4">{{ usuario.perfil.bairro }}</dd>
 

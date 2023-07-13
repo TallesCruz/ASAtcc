@@ -1,14 +1,36 @@
 from django import forms
 from django.contrib.auth.models import User
 from . import models
-
+import datetime
 
 class PerfilForm(forms.ModelForm):
-    data_nascimento = forms.DateField(label='Data de nascimento', widget=forms.DateInput(format= '%d/%m/%Y', attrs={'type':'date'}) )
     class Meta:
         model = models.Perfil
         fields = '__all__'
         exclude = ('usuario',)
+
+    def __init__(self, *args, **kwargs):
+        super(PerfilForm, self).__init__(*args, **kwargs)
+        perfil = kwargs.get('instance')
+        if perfil:  # Verifica se é uma atualização
+            self.fields['data_nascimento'] = forms.DateField(label='Data de nascimento')
+        else:  # Caso contrário, é uma criação
+            self.fields['data_nascimento'] = forms.DateField(
+                label='Data de nascimento',
+                widget=forms.DateInput(format='%d/%m/%Y', attrs={'type': 'date'})
+            )
+
+
+    def clean_data_nascimento(self):
+        data_nascimento = self.cleaned_data.get('data_nascimento')
+        if data_nascimento:
+            # Verifica se é uma instância de datetime.date
+            if isinstance(data_nascimento, datetime.date):
+                # Converte a data em uma string no formato correto
+                data_nascimento = data_nascimento.strftime('%d/%m/%Y')
+            # Converte a string em um objeto datetime.date
+            data_nascimento = datetime.datetime.strptime(data_nascimento, '%d/%m/%Y').date()
+        return data_nascimento
 
 
 class UserForm(forms.ModelForm):

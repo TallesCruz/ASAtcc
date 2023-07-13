@@ -15,7 +15,7 @@
             {% csrf_token %}
             <div class="row">
                 <div class="col-md-12">
-                    {{ form.card_type|as_crispy_field }}
+                    {{ form.card_type|as_crispy_field|safe }}
                 </div><div class="col-md-12">
                     {{ form.cardholder_name|as_crispy_field }}
                 </div>
@@ -31,6 +31,9 @@
                 <div class="col-md-6">
                     {{ form.cvv|as_crispy_field }}
                 </div>
+                <div class="col-md-2" id="id_installments" style="display: none;">
+                    {{ form.installments|as_crispy_field|safe }}
+                </div>
             </div>
     </div>
 </div>
@@ -44,6 +47,17 @@
 
     </div>
 </div>
+<script>
+    document.getElementById("id_card_type").addEventListener("change", function() {
+        var cardType = this.value;
+        var installmentsField = document.getElementById("id_installments");
 
+        if (cardType === "credit") {
+            installmentsField.style.display = "block";
+        } else {
+            installmentsField.style.display = "none";
+        }
+    });
+</script>
 
 {% endblock %}

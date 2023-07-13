@@ -20,21 +20,19 @@ class ListaProdutos(ListView):
     model = models.Produto
     template_name = 'produto/lista.html'
     context_object_name = 'produtos'
-    paginate_by = 10
+    paginate_by = 9
     ordering = ['-id']
 
 class ListaProdutosM(ListView):
     model = models.Produto
     template_name = 'produto/listaM.html'
     context_object_name = 'produtos'
-    paginate_by = 10
     ordering = ['-id']
 
 class ListaProdutosF(ListView):
     model = models.Produto
     template_name = 'produto/listaF.html'
     context_object_name = 'produtos'
-    paginate_by = 10
     ordering = ['-id']
 
 
@@ -42,7 +40,6 @@ class ListaProdutosI(ListView):
     model = models.Produto
     template_name = 'produto/listaI.html'
     context_object_name = 'produtos'
-    paginate_by = 10
     ordering = ['-id']
 
 
@@ -50,7 +47,6 @@ class ListaProdutosA(ListView):
     model = models.Produto
     template_name = 'produto/listaA.html'
     context_object_name = 'produtos'
-    paginate_by = 10
     ordering = ['-id']
 
 class Busca(ListaProdutos):
@@ -237,17 +233,21 @@ class ResumoDaCompra(View):
 
         return render(self.request, 'produto/resumodacompra.html', contexto)
 
-
 from pedido.models import ItemPedido, Pedido
-from django.db.models import Sum
+from .models import Produto, Variacao
+from django.db.models import Sum, Count
+from pedido.models import ItemPedido, Pedido
+
 def solicitacao(request):
     pedidos = Pedido.objects.all()
+    produtos = Produto.objects.all()
     faturamento_total = pedidos.aggregate(faturamento=Sum('total'))['faturamento'] or 0
     produto_mais_vendido = ItemPedido.objects.values('produto').annotate(total_vendas=Sum('quantidade')).order_by('-total_vendas').first()
     produto_menos_vendido = ItemPedido.objects.values('produto').annotate(total_vendas=Sum('quantidade')).order_by('-total_vendas').last()
 
     return render(request, "produto/solicitacao.html", {
         "pedidos": pedidos,
+        "produtos": produtos,
         "faturamento_total": faturamento_total,
         "produto_mais_vendido": produto_mais_vendido,
         "produto_menos_vendido": produto_menos_vendido

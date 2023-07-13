@@ -10,64 +10,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
   <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.13/css/jquery.dataTables.min.css">
-  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-  <script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
-  <script>
-    function parseDateValue(rawDate) {
-      var dateArray = rawDate.split("/");
-      var parsedDate = dateArray[2] + "-" + dateArray[1] + "-" + dateArray[0];
-      return parsedDate;
-    }
-
-    $(document).ready(function() {
-      $.fn.dataTable.ext.search.push(
-        function(settings, data, dataIndex) {
-          var dateStart = parseDateValue($("#min").val());
-          var dateEnd = parseDateValue($("#max").val());
-          var evalDate = parseDateValue(data[3]);
-
-          if ((isNaN(dateStart)) || (isNaN(dateEnd))) {
-            return true;
-          }
-          if (evalDate >= dateStart && evalDate <= dateEnd) {
-            return true;
-          } else {
-            return false;
-          }
-        }
-      );
-
-      $("#min").datepicker({
-        dateFormat: 'dd/mm/yy',
-        onSelect: function() {
-          table.draw();
-        },
-        changeMonth: true,
-        changeYear: true
-      });
-
-      $("#max").datepicker({
-        dateFormat: 'dd/mm/yy',
-        onSelect: function() {
-          table.draw();
-        },
-        changeMonth: true,
-        changeYear: true
-      });
-
-      var table = $('#example').DataTable({
-        "language": {
-          "url": "//cdn.datatables.net/plug-ins/1.10.20/i18n/Portuguese-Brasil.json"
-        }
-      });
-
-      $('#min, #max').change(function() {
-        table.draw();
-      });
-    });
-  </script>
-
-
+ 
   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.dataTables.min.css">
 
   
@@ -78,18 +21,24 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
   <script src="https://cdn.datatables.net/buttons/2.3.6/js/buttons.html5.min.js"></script>
-
-  <script>$(document).ready(function() {
-    $('#example ').DataTable( {
+  <script>
+  
+    $(document).ready(function() {
+      $('#example').DataTable({
+       
+        language: {
+          url: '//cdn.datatables.net/plug-ins/1.10.22/i18n/Portuguese-Brasil.json'},
+        
         dom: 'Bfrtip',
         buttons: [
-            'copyHtml5',
-            'excelHtml5',
-            'csvHtml5',
-            'pdfHtml5'
+          'copyHtml5',
+          'excelHtml5',
+          'csvHtml5',
+          'pdfHtml5'
         ]
-    } );
-} );</script>
+      });
+    });
+  </script>
   <style>
   div{
     width:95%;
@@ -98,45 +47,24 @@
   </style>
 </head>
 <body><div>
-  <table  border="0" cellspacing="5" cellpadding="5">
-    <tbody>
-      <tr>
-        <td>Data Inicial:</td>
-        <td><input name="min" id="min" type="text" autocomplete="off"></td>
-      </tr>
-      <tr>
-        <td>Data Final:</td>
-        <td><input name="max" id="max" type="text" autocomplete="off"></td>
-      </tr>
-    </tbody>
-  </table>
   <table width="100%" class="display" id="example" cellspacing="0">
   <thead>
     <tr>
-            <th>Pedido</th>
-            <th>Total</th>
-            <th>Data do Pedido</th>
-            <th>Qntd. de Itens total</th>
-            <th>Faturamento do Pedido</th>
-            <th>Itens e Qtnd. do Pedido</th>
-            <th>Status</th>
+      <th>Produtos</th>
+      <th>Descrição Curta</th>
+      <th>Preço</th>
+      <th>Forncedor</th>
+      <th>Tipo</th>
           </tr>
         </thead>
         <tbody>
-          {% for pedido in pedidos %}
+          {% for produto in produtos %}
           <tr>
-            <td>{{ pedido.pk }}</td>
-            <td>{{ pedido.total }}</td>
-              <td>{{ pedido.data_pedido|date:"d/m/Y" }}</td>
-              <td>{{ pedido.qtd_total }}</td>
-              <td>{{ pedido.total }}</td>
-  
-          <td>
-                  {% for item in pedido.itempedido_set.all %}
-                      {{ item.produto }} - {{ item.quantidade }}<br>
-                  {% endfor %}
-          </td>
-            <td>{{ pedido.get_status_display  }}</td>
+            <td>{{ produto.nome }}</td>
+            <td>{{ produto.descricao_curta  }}</td>
+            <td>{{ produto.preco_marketing }}</td>
+            <td>{{ produto.fornecedor.nome }}</td>
+            <td>{{ produto.get_tipo_display  }}</td>
           </tr>
           {% endfor %} <tr>{% if produto_mais_vendido %}
             <td colspan="2">Produto mais Vendido:</td>
